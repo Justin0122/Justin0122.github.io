@@ -1,0 +1,67 @@
+---
+
+---
+
+<div id="theme-toggle" class="flex space-x-2">
+    <button class="w-8 h-8 flex items-center justify-center bg-light-theme" aria-label="Change to light theme"
+            data-theme="light">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
+             style="color: #ede9fe;">
+            <circle cx="8" cy="8" r="8"></circle>
+        </svg>
+    </button>
+    <button class="w-8 h-8 flex items-center justify-center bg-green-theme" aria-label="Change to green theme"
+            data-theme="green">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
+             style="color: #e9feed;">
+            <circle cx="8" cy="8" r="8"></circle>
+        </svg>
+    </button>
+    <button class="w-8 h-8 flex items-center justify-center bg-dark-theme" aria-label="Change to dark theme"
+            data-theme="dark">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
+             style="color: #211a2e;">
+            <circle cx="8" cy="8" r="8"></circle>
+        </svg>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const theme = (() => {
+            if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+                return localStorage.getItem('theme') || 'light';
+            }
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        })();
+
+        document.documentElement.classList.remove('light', 'dark', 'green');
+        document.documentElement.classList.add(theme);
+        window.localStorage.setItem('theme', theme);
+
+        const handleToggleClick = (event) => {
+            const button = event.target.closest('button');
+            const theme = button.dataset.theme;
+            const element = document.documentElement;
+            element.classList.remove('light', 'dark', 'green');
+            element.classList.add(theme);
+            localStorage.setItem('theme', theme);
+        };
+
+        const buttons = document.querySelectorAll('#theme-toggle button');
+        buttons.forEach(button => button.addEventListener('click', handleToggleClick));
+    });
+</script>
+
+<script>
+    document.addEventListener('astro:after-swap', () => {
+        const theme = localStorage.theme;
+        if (theme) {
+            document.documentElement.classList.remove('light', 'dark', 'green');
+            document.documentElement.classList.add(theme);
+        }
+    });
+</script>

@@ -1,0 +1,126 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Button from '../../../components/Button.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import PostPreview from '../../../components/nl/PostPreview.astro';
+import Subscribe from '../../../components/Subscribe.astro';
+import { sortItemsByDateDesc } from '../../../utils/data-utils';
+import { slugify } from '../../../utils/common-utils';
+import ArrowRight from '../../../icons/ArrowRight.astro';
+const { class: className, headingLevel = 'h2' } = Astro.props;
+const TitleTag = headingLevel;
+
+export async function getStaticPaths() {
+    const posts = (await getCollection('NLblog')).sort(sortItemsByDateDesc);
+    const postCount = posts.length;
+    return posts.map((post, index) => ({
+        params: { slug: post.slug },
+        props: {
+            post,
+            prevPost: index + 1 !== postCount ? posts[index + 1] : null,
+            nextPost: index !== 0 ? posts[index - 1] : null
+        }
+    }));
+}
+
+type Props = { post: CollectionEntry<'NLblog'>; prevPost: CollectionEntry<'NLblog'>; nextPost: CollectionEntry<'NLblog'> };
+
+const { href } = Astro.url;
+const { post, prevPost, nextPost } = Astro.props;
+const { title, publishDate, updatedDate, excerpt, tags = [], seo } = post.data;
+const { Content } = await post.render();
+---
+
+<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" showHeader={false}>
+    <article class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+            <div class="mt-4 text-sm">
+                <FormattedDate date={publishDate} />
+                {
+                    updatedDate && (
+                        <>
+                            {' '}
+                            <span>
+                                (Bijgewerkt op <FormattedDate date={updatedDate} />)
+                            </span>
+                        </>
+                    )
+                }
+            </div>
+        </header>
+        <div class="max-w-none prose prose-dante sm:prose-lg">
+            <Content />
+        </div>
+        <div class="mt-8 flex flex-wrap items-center gap-6 text-sm justify-between sm:mt-12 sm:text-base">
+            {
+                tags.length > 0 && (
+                    <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                        {tags.map((tag) => (
+                            <a class="text-main hover:underline" href={`/nl/tags/${slugify(tag)}`}>
+                                #{tag}
+                            </a>
+                        ))}
+                    </div>
+                )
+            }
+            <Button class="copy-url-button" aria-label="Link kopiëren" data-url={href} data-tooltip-default="Link kopiëren" data-tooltip-success="Gekopieerd">Delen</Button>
+        </div>
+    </article>
+    {
+        (prevPost || nextPost) && (
+            <div class="my-16 sm:my-24">
+                <a class:list={['flex justify-between items-start gap-8 group mb-12 sm:mb-16 mb-12 font-serif italic sm:mb-16', className]}
+                   href={`/blog/`}>
+                    <div class="grow">
+                        <TitleTag
+                            class="text-xl font-serif font-medium group-hover:underline group-hover:decoration-dashed group-hover:underline-offset-4 group-hover:decoration-1 sm:text-2xl">
+                            Andere Berichten Bekijken
+                        </TitleTag>
+                    </div>
+                    <div
+                        class="hidden font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:gap-1 sm:items-center sm:shrink-0">
+                        Alle Berichten Bekijken
+                        <ArrowRight class="fill-current w-4 h-4" />
+                    </div>
+                </a>
+                {nextPost && (
+                    <div>
+                        <h2 class="mb-4 text-xl font-serif italic sm:text-2xl">Bekijk Vorige</h2>
+                        <PostPreview post={nextPost} class="mb-10 sm:mb-12" headingLevel="h3" />
+                    </div>
+                )}
+                {prevPost && (
+                    <div>
+                        <h2 class="mb-4 text-xl font-serif italic sm:text-2xl">Bekijk Volgende</h2>
+                        <PostPreview post={prevPost} class="mb-10 sm:mb-12" headingLevel="h3" />
+                    </div>
+                )}
+            </div>
+        )
+    }
+    <Subscribe class="my-16 sm:my-24" />
+</BaseLayout>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement;
+        copyUrlButton?.addEventListener('click', async () => {
+            await copyUrl(copyUrlButton);
+        });
+
+        async function copyUrl(button: HTMLButtonElement) {
+            let url = button.getAttribute('data-url') || '';
+            let label = button.innerText;
+
+            await navigator.clipboard.writeText(url);
+
+            button.innerText = 'Gekopieerd';
+
+            setTimeout(() => {
+                button.innerText = label;
+            }, 2500);
+        }
+    });
+</script>

@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    /* Default */
+    /*
+    :root {
+        --color-text-main: 23 23 23;
+        --color-bg-main: 242 241 236;
+        --color-bg-muted: 234 233 225;
+        --color-border-main: 23 23 23;
+    }
+    html.dark {
+        --color-text-main: 242 241 236;
+        --color-bg-main: 23 23 23;
+        --color-bg-muted: 36 36 36;
+        --color-border-main: 242 241 236;
+    }
+     */
+
+    body {
+        transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    :root {
+        --color-text-main: 23 23 23;
+        --color-bg-main: 237 233 254;
+        --color-bg-muted: 234 233 225;
+        --color-border-main: 23 23 23;
+    }
+    html.dark {
+        --color-text-main: 237 233 254;
+        --color-bg-main: 33 26 46;
+        --color-bg-muted: 36 36 36;
+        --color-border-main: 237 233 254;
+    }
+    html.green {
+        --color-text-main: 23 23 23;
+        --color-bg-main: 233 254 237;
+        --color-bg-muted: 234 233 225;
+        --color-border-main: 23 23 23;
+    }
+
+
+    /* Cyan */
+    /*
+    :root {
+        --color-text-main: 22 42 43;
+        --color-bg-main: 214 224 226;
+        --color-bg-muted: 204 216 219;
+        --color-border-main: 22 42 43;
+    }
+    html.dark {
+        --color-text-main: 214 224 226;
+        --color-bg-main: 22 42 43;
+        --color-bg-muted: 28 53 55;
+        --color-border-main: 214 224 226;
+    }
+    */
+
+}

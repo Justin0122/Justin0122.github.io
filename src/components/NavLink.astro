@@ -1,0 +1,39 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'>;
+
+const { href, class: className, ...props } = Astro.props;
+
+const { pathname } = Astro.url;
+const isActive = href === pathname || href === pathname.replace(/\/$/, '');
+---
+
+<a class:list={[className, { 'underline underline-offset-2 decoration-1': isActive }]} href={href} {...props}
+   data-swup-preload>
+    <slot />
+</a>
+
+<script>
+    const titleObserver = new MutationObserver(() => {
+        const currentUrl = window.location.pathname;
+        const links = document.querySelectorAll('.nav a');
+
+        links.forEach(link => {
+            link.classList.remove('underline', 'underline-offset-2', 'decoration-1');
+        });
+
+        const sortedLinks = Array.from(links).sort((a, b) => b.getAttribute('href').length - a.getAttribute('href').length);
+        const currentLink = sortedLinks.find(link => currentUrl.startsWith(link.getAttribute('href')));
+        if (currentLink) {
+            currentLink.classList.add('underline', 'underline-offset-2', 'decoration-1');
+        } else {
+            const homeLink = document.querySelector(`a[href="/"]`);
+            homeLink.classList.add('underline', 'underline-offset-2', 'decoration-1');
+        }
+    });
+
+    // Start observing the title for changes
+    const titleElement = document.querySelector('title');
+    titleObserver.observe(titleElement, { childList: true });
+</script>

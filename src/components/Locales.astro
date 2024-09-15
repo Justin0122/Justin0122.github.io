@@ -1,0 +1,63 @@
+---
+import { languages } from '../i18n/ui';
+---
+
+<div id="locales-switch" class="flex space-x-2">
+    {Object.entries(languages).map(([locale, flag]) => (
+        <a href="#" class="locale-button" data-locale={locale}>
+            {flag}
+        </a>
+    ))}
+</div>
+
+<script>
+    const updateLocaleButtons = () => {
+        const localeButtons = document.querySelectorAll('.locale-button');
+        const currentPath = window.location.pathname.split('/').slice(1).join('/');
+
+        localeButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                localeButtons.forEach(b => b.classList.remove('selected'));
+                const locale = button.getAttribute('data-locale');
+                const newPath = currentPath.startsWith(locale) ? currentPath : `${locale}/${currentPath.split('/').slice(1).join('/')}`;
+                window.location.href = `/${newPath}`;
+            });
+        });
+
+        const currentLocale = window.location.pathname.split('/')[1];
+        localeButtons.forEach(button => {
+            if (button.getAttribute('data-locale') === currentLocale) {
+                button.classList.add('selected');
+            }
+        });
+    };
+
+    document.addEventListener('astro:page-load', updateLocaleButtons);
+    document.addEventListener('astro:after-swap', updateLocaleButtons);
+
+    // Ensure the function is called immediately to handle the initial load
+    updateLocaleButtons();
+
+    // Use MutationObserver to detect changes in the DOM and update the links
+    const observer = new MutationObserver(updateLocaleButtons);
+    observer.observe(document.body, { childList: true, subtree: true });
+</script>
+
+<style>
+    .locale-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 1.25rem;
+        text-decoration: none;
+    }
+
+    .locale-button.selected {
+        background-color: rgba(0, 0, 0, 0.65);
+        transition: background-color 0.5s;
+    }
+</style>
